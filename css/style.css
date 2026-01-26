@@ -1,0 +1,600 @@
+:root {
+    --primary-color: #ffa500;
+    --text-color: #fff;
+    --background-color: #191b27;
+
+    /* Colors for debugging menus & stuff */
+    /* --debug-color: transparent; */
+    --debug-color: transparent;
+
+    /* Colors of da squares */
+    --correct-color: #00b42d;
+    --partial-correct-color: #e48e0d;
+    --incorrect-color: #ff3131;
+}
+
+.custom-body{
+    font-family: Ubuntu, Helvetica, Arial;
+
+    background-image: linear-gradient(to top, black, transparent), url('../img/season4-arc6.jpg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+
+
+    height: 100%;
+    color: var(--text-color);
+}
+
+.header-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    color: var(--text-color);
+    margin-top: 2rem;
+
+    border: 1px solid var(--debug-color);
+}
+
+.header-container h1 {
+    text-align: center;
+    font-size: 5rem;
+}
+
+.header-container img {
+    justify-content: center;
+    align-items: center;
+    max-width: 350px;
+    width: 80%;
+    -webkit-filter: drop-shadow(0px 0px 5px #222);
+    filter: drop-shadow(0px 0px 3px #222);
+}
+
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+
+    margin-top: .5rem;
+    
+}
+
+.sub-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+
+    border: 1px solid var(--debug-color);
+}
+
+.game {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 4px 3px rgba(0, 0, 0, .3);
+    width: 80%;
+    max-width: 750px;
+}
+
+.fancy-background {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    background: #1e2328;
+    font-size: 1rem;
+    padding: .8rem .2rem;
+    vertical-align: center;
+    align-content: center;
+    justify-self: center;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+}
+
+.answers {
+    width: 80%;
+}
+
+.guessbox {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    position: relative;
+}
+
+.character-item {
+    background-color: #1e2328;
+    padding: 8px 15px !important;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.character-item.selected {
+    background-color: #292d30;
+}
+
+.character-item:hover {
+    background-color: #292d30;
+}
+
+.character-select {
+    display: flex;
+    flex-direction: row;
+    column-gap: 1rem;
+    align-items: center;
+    justify-content: start;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 0px;
+    background-color: inherit;
+    color: inherit;
+}
+
+.character-select img {
+    width: 40px;
+    aspect-ratio: auto 40 / 40;
+    height: 40px;
+}
+
+.content {
+    margin-top: 15px;
+    padding-bottom: 20px;
+    width: 360px;
+}
+
+.content .search {
+    position: relative;
+}
+
+.search input {
+    height: 70px;
+    margin-bottom: 5px;
+    color: var(--text-color);
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-color: #1e2328;
+    border: 1px solid var(--debug-color);
+    pointer-events: auto;
+    flex: 1 1;
+    margin-top: 0;
+    min-width: 0;
+    position: relative;
+    line-height: 20px;
+    max-width: 100%;
+    width: 100%;
+    padding: 0 15px 0 15px;
+}
+
+.options {
+    width: 100%;
+    background-color: #1e2328;
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: absolute;
+    z-index: 9999;
+}
+
+.options p {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.options::-webkit-scrollbar{
+    width: 7px;
+}
+
+.options::-webkit-scrollbar-track{
+    background: var(--background-color);
+}
+
+.options::-webkit-scrollbar-thumb{
+    background: var(--primary-color);
+}
+
+.guessed-answers {
+    z-index: -99;
+    position: relative;
+    display: block;
+}
+
+.guessed-answers-header, 
+.guessed-answers-container {
+    width: 280%; 
+    margin: 0px 0px 0px -90%; 
+}
+
+.guessed-answers-container{
+    width: 280%;
+    margin: 0px 0px 0px -90%;
+}
+
+.square-container {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: nowrap; /* IMPEDE A QUEBRA DE LINHA */
+    justify-content: center;
+}
+
+.square {
+    position: relative;
+    margin: 6px; /* ESPAÇAMENTO AUMENTADO ENTRE BLOCOS */
+    box-sizing: border-box;
+    flex-basis: calc(10% - 12px); /* 10 colunas = 10% cada menos a margem */
+    min-width: 100px; /* Garante tamanho mínimo para leitura */
+}
+
+.square-answer-tile {
+    min-height: 90px;
+    border: 1px solid hsla(0, 0%, 100%, .59);
+    box-shadow: inset 0 0 6px #000;
+    text-shadow: 0 0 3px #000;
+    background-color: #1e2328;
+    min-width: 110px;
+}
+
+.square-content {
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 2; /* Texto por cima da seta */
+    
+    /* --- AJUSTES PARA QUEBRA DE LINHA --- */
+    padding: 4px;             /* Garante que o texto não cole na borda */
+    white-space: normal;      /* Permite que o texto ocupe várias linhas */
+    overflow-wrap: break-word; /* Quebra palavras longas se necessário */
+    word-break: break-word;    /* Força a quebra (essencial para nomes compostos) */
+    line-height: 1.1;         /* Diminui o espaço entre linhas para caber mais texto */
+    font-size: 0.9rem;       /* Reduz levemente a fonte apenas para os dados */
+    hyphens: auto;            /* Adiciona hífens se o navegador suportar */
+}
+
+.square::before {
+    padding-top: 100% !important; /* Mantém o formato quadrado perfeito */
+    content: "";
+    display: block;
+}
+
+.square-unknown::after{
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    clip-path: polygon(0% 0%, 100% 0%, 0% 100%);
+    background: rgba(0, 0, 0, .5);
+    top: 1px;
+    left: 0;
+    z-index: -1;
+}
+
+/* SETA PARA BAIXO: RESPOSTA CORRETA É MENOR */
+.square-down::after{
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    clip-path: polygon(97% 60%, 80% 60%, 80% 5%, 20% 5%, 20% 60%, 3% 60%, 50% 95%);
+    background: rgba(0, 0, 0, 0.4); /* Sombra escura no formato da seta */
+    top: 0;
+    left: 0;
+    z-index: 1; /* Fica entre o fundo colorido e o texto */
+}
+
+/* SETA PARA CIMA: RESPOSTA CORRETA É MAIOR */
+.square-up::after{
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    clip-path: polygon(97% 40%, 80% 40%, 80% 95%, 20% 95%, 20% 40%, 3% 40%, 50% 5%);
+    background: rgba(0, 0, 0, 0.4); /* Sombra escura no formato da seta */
+    top: 0;
+    left: 0;
+    z-index: 1; /* Fica entre o fundo colorido e o texto */
+}
+
+.square-container hr {
+    width: 90%;
+    border-left: none;
+    border-top: none;
+    border-right: none;
+    border-bottom: 3px solid #fff;
+    display: block;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+    unicode-bidi: isolate;
+    overflow: hidden;
+}
+
+.user-answer{
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.square-answer-tile{
+    min-height: 75px;
+    flex-basis: calc(11.11% - 4px);
+    position: relative;
+    margin: 2px;
+    border: 1px solid hsla(0, 0%, 100%, .59);
+    box-sizing: border-box;
+    box-shadow: inset 0 0 6px #000;
+    text-shadow: 0 0 3px #000;
+}
+
+.square-answer-tile:hover .box-animation {
+    transform: rotateY(180deg);
+}
+
+.guess-incorrect{
+    background-color: var(--incorrect-color);
+}
+
+.guess-partial{
+    background-color: var(--partial-correct-color);
+}
+
+.guess-correct{
+    background-color: var(--correct-color);
+}
+
+.square-content img{
+    width: 100%;
+    background-color: black;
+    z-index: 1;
+}
+
+/* TESTING LIKE THE ANIMATION SHIT */
+.box-animation {
+    transform-style: preserve-3d;
+    transition: transform .7s linear;
+}
+
+.box-animation.active {
+    color: transparent;
+    transition: transform 2s;
+    background: transparent;
+    font-size: 0;
+    transform: rotateY(180deg);
+}
+
+.animation-fix {
+    color: transparent;
+    background: transparent;
+    text-shadow: 0 0 0px transparent;
+}
+
+/* CONFIGURAÇÃO DO POPUP DE VITÓRIA (MODAL) */
+.win-screen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px); /* Efeito de desfoque */
+    -webkit-backdrop-filter: blur(10px);
+    display: none; /* Controlado via JS */
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.win-background {
+    border-radius: 12px;
+    padding: 3rem 3rem;
+    display: flex;
+    flex-direction: column;
+    vertical-align: center;
+    justify-self: center;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    background: linear-gradient(#0d4d27, #1e2328);
+    border: 2px solid #69ffa5;
+    row-gap: .5rem;
+    max-width: 450px;
+    width: 90%;
+}
+
+.win-answer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    column-gap: .8rem;
+    align-items: center;
+}
+
+.win-answer img {
+    border: 1px solid hsla(0, 0%, 100%, .59);
+    width: 80px;
+}
+
+.win-answer-name {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.win-answer-text {
+    font-size: .9rem;
+}
+
+.yay-image{
+    width: 80%;
+}
+
+.yay-image img{
+    width: 100%;
+}
+
+.nb-trys{
+    font-size: 1.2rem;
+    width: 80%;
+}
+
+.timer-title{
+    margin: 0 auto;
+    text-align: center;
+    font-size: 1.3rem;
+}
+
+.timer{
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.countdown {
+    margin-top: -15px;
+}
+
+.countdown ul {
+    padding-left: 0;
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+}
+
+.countdown li span{
+    display: block;
+    font-size: 3.5rem;
+    font-weight: 800;
+}
+
+.countdown .separator{
+    line-height: 1.35;
+    margin: 0 5px;
+    font-size: 3.5rem;
+}
+
+/* Nome do personagem sobre a imagem */
+.char-name-overlay {
+    position: absolute;
+    bottom: 6px; /* Distância do fundo do quadrado */
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 0.7rem; /* Bem pequeno */
+    font-weight: 800; /* Negrito para destacar */
+    line-height: 1;
+    z-index: 3; /* Sobre a seta e a imagem */
+    pointer-events: none; /* Permite clicar através do texto se necessário */
+    
+    /* Sombra forte (outline) para leitura em qualquer fundo */
+    text-shadow: 
+        -1px -1px 0 #000,
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000,
+         0px 2px 4px rgba(0,0,0,0.8);
+}
+
+.hint-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.hint-button {
+    background-color: var(--primary-color);
+    color: black;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.hint-button:hover:not(:disabled) {
+    transform: scale(1.05);
+    background-color: #ffcc00;
+}
+
+.hint-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.hint-text {
+    background: rgba(30, 35, 40, 0.9);
+    border: 1px solid var(--primary-color);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: white;
+    width: 100%;
+}
+
+/* PERSONAGEM DE ONTEM */
+.yesterday-row {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+}
+
+.yesterday-label {
+    padding-right:10px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: white;
+}
+
+.yesterday-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 5px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--primary-color);
+}
+
+.yesterday-content img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.yesterday-content span {
+    color: var(--primary-color);
+    font-weight: bold;
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Re:Zero Guesser - Edição Wiki</title>
+</head>
+<body class="custom-body">
+    <div class="container mx-auto header-container">
+        <img src="img/rezerodle_title.png" alt="Re:Zero Guesser">
+    </div>
+
+    <div class="container main-container">
+        <div class="sub-container">
+            <div class="game">
+                <div class="fancy-background">
+                    <span>Adivinhe o personagem de Re:Zero de hoje!</span>
+                    <div id="yesterday-row" class="yesterday-row" style="display: none;">
+                        <span class="yesterday-label">Personagem de ontem:</span>
+                        <div class="yesterday-content">
+                            <img id="yesterday-img" src="" alt="">
+                            <span id="yesterday-name"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hint-section mb-3">
+                <button id="btn-hint" class="hint-button">Revelar Dica</button>
+                <div id="hint-display" class="hint-text" style="display: none;"></div>
+            </div>
+
+            <div class="answers">
+                <div class="guessbox">
+                    <div class="content">
+                        <div class="search">
+                            <input type="text" placeholder="Carregando Wiki..." disabled>
+                        </div>
+                        <div class="options"></div>
+                    </div>
+                </div>
+
+                <div class="guessed-answers">
+                    <div class="guessed-answers-header">
+                        <div class="square-container">
+                            <div class="square square-header-tile"><div class="square-content">Personagem</div><hr></div>
+                            <div class="square square-header-tile"><div class="square-content">Gênero</div><hr></div>
+                            <div class="square square-header-tile"><div class="square-content">Raça</div><hr></div>
+                            <div class="square square-header-tile"><div class="square-content">Altura</div><hr></div>
+                            <div class="square square-header-tile"><div class="square-content">Status</div><hr></div>
+                            <div class="square square-header-tile"><div class="square-content">Idade</div><hr></div>
+                            <div class="square square-header-tile"><div class="square-content">Afiliação</div><hr></div>
+                            <div class="square square-header-tile"><div class="square-content">Afinidade</div><hr></div>
+                            <div class="square square-header-tile"><div class="square-content">Proteção</div><hr></div>
+                            <div class="square square-header-tile"><div class="square-content">Autoridade</div><hr></div>
+                        </div>
+                    </div>
+                    <div class="user-answer"></div>
+                </div>
+            </div>
+
+            <div id="win-popup" class="win-screen-overlay" style="display: none;">
+                <div class="win-background">
+                    <div class="win-answer">
+                        <img id="win-char-img" src="" alt="Personagem">
+                        <div class="win-info">
+                            <span class="win-answer-text">Você adivinhou</span>
+                            <h2 id="win-char-name" class="win-answer-name">Personagem</h2>
+                        </div>
+                    </div>
+                    <p class="nb-trys">Você levou <span id="try-count">0</span> tentativas</p>
+                    <div class="timer-info">
+                        <div class="timer-title">Próximo personagem em</div>
+                        <div class="countdown">
+                            <ul>
+                                <li><span id="hours">00</span></li>
+                                <li class="separator">:</li>
+                                <li><span id="minutes">00</span></li>
+                                <li class="separator">:</li>
+                                <li><span id="seconds">00</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <button class="hint-button mt-3" onclick="document.getElementById('win-popup').style.display='none'">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="javascript/character_data.js"></script>
+    <script src="javascript/options_logic.js"></script>
+</body>
+</html>
