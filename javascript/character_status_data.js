@@ -1,0 +1,22 @@
+export const statusMap = {
+    "Alive": "Vivo",
+    "Alive (Asleep in a Glintstone)": "Vivo (Dormindo em uma Pedra de Brilho)",
+    "Alive (Frozen in ice)": "Vivo (Congelado no gelo)",
+    "Alive (Sealed)": "Vivo (Selado)",
+    "Alive (sealed)": "Vivo (Selado)",
+    "Alive (Stuck in Scorpion form)": "Vivo (Preso na forma de Escorpião)",
+    "Alive (Suspended animation)": "Vivo (Animação suspensa)",
+    "Alive (suspended animation)": "Vivo (Animação suspensa)",
+    "Alive (imprisoned)": "Vivo (Aprisionado)",
+    "Alive (past)<br>Unknown (present)": "Vivo (Passado)<br>Desconhecido (Presente)",
+    "Alive (within [[Arakiya]])": "Vivo (Dentro de Arakiya)",
+    "Deceased": "Morto",
+    "Deceased (body)<br>Alive (soul)": "Morto (Corpo)<br>Vivo (Alma)",
+    "Deceased (original body)<br>Alive (as [[Omega]])": "Morto (Corpo original)<br>Vivo (Como Omega)",
+    "Undead": "Morto-vivo",
+    "Unknown": "Desconhecido",
+    "Unknown (active)<ref group=Note>It is unclear whether or not Todd is [[Undead": "Desconhecido (Ativo)*",
+    "Unknown (original self)<br>Alive (as [[Spica]])": "Desconhecido (Eu original)<br>Vivo (Como Spica)",
+    "Unknown (presumably deceased)": "Desconhecido (Presumivelmente morto)",
+    "Unknown (sealed in a mana crystal)": "Desconhecido (Selado em Cristal de mana)"
+};

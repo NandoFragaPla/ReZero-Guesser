@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <title>Re:Zero Guesser - Edição Wiki</title>
+    <title>Re:Zero - Guesser</title>
 </head>
 <body class="custom-body">
     <div class="container mx-auto header-container">
@@ -24,11 +24,19 @@
                             <span id="yesterday-name"></span>
                         </div>
                     </div>
+                    <div id="yesterday-row" class="yesterday-row" style="display: none;">
+                        <span class="yesterday-label">Personagem de ontem:</span>
+                        <div class="yesterday-content">
+                            <img id="yesterday-img" src="" alt="">
+                            <span id="yesterday-name"></span>
+                        </div>
+                    </div>
+                    <div id="char-count" style="color: white; text-align: center; margin-top: 10px;"></div>
                 </div>
             </div>
 
             <div class="hint-section mb-3">
-                <button id="btn-hint" class="hint-button">Revelar Dica</button>
+                <button id="btn-hint" class="hint-button"style="display: none;">Revelar Dica</button>
                 <div id="hint-display" class="hint-text" style="display: none;"></div>
             </div>
 
@@ -90,6 +98,6 @@
     </div>
 
     <script src="javascript/character_data.js"></script>
-    <script src="javascript/options_logic.js"></script>
+    <script type="module" src="javascript/options_logic.js"></script>
 </body>
 </html>
