@@ -91,17 +91,35 @@ export class CharacterData {
     return gendersMap[formattedName] || formattedName;
   }
 
+  /** Tira link, ref e template da wiki e deixa o texto que a pessoa lê. */
+  cleanWikiText(value) {
+    if (!value) return "";
+    return value
+      .replace(/<ref[\s\S]*?<\/ref>/gi, "")
+      .replace(/\{\{[\s\S]*?\}\}/g, "")
+      .replace(/\[\[(?:[^|\]]+\|)?([^\]]+)\]\]/g, "$1")
+      .replace(/'{2,}/g, "")
+      .replace(/[ \t]{2,}/g, " ")
+      .trim();
+  }
+
+  normalizeWikiKey(value) {
+    return this.cleanWikiText(value)
+      .toLowerCase()
+      .replace(/<br\s*\/?>/gi, "<br>")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
   translateStatus(name) {
     if (!name) return t("unknown");
-    const clean = name.trim().replace(/<ref.*?>.*?<\/ref>/g, "");
+    const clean = this.cleanWikiText(name).replace(/<br\s*\/?>/gi, "<br>");
+    if (!clean || clean === "N/A") return t("unknown");
     if (getLang() === "en") return clean;
-    // Busca exata
-    if (statusMap[clean]) return statusMap[clean];
-    // Busca case-insensitive e ignora espaços extras
-    const normalized = clean.toLowerCase().replace(/\s+/g, " ");
+    if (statusMap[name.trim()]) return statusMap[name.trim()];
+    const target = this.normalizeWikiKey(clean);
     for (const key in statusMap) {
-      const keyNorm = key.toLowerCase().replace(/\s+/g, " ");
-      if (normalized === keyNorm) return statusMap[key];
+      if (this.normalizeWikiKey(key) === target) return statusMap[key];
     }
     return clean;
   }
@@ -309,14 +327,78 @@ export class CharacterData {
     return allTitles;
   }
 
+  /** Lê um campo de infobox sem cortar no | de um link nem engolir o campo seguinte. */
+  readTemplateField(wikitext, field) {
+    const escaped = field.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = wikitext.match(
+      new RegExp(
+        `(?:^|\\n)\\|\\s*${escaped}\\s*=[ \\t]*([\\s\\S]*?)(?=\\n\\s*\\||\\n\\s*\\}\\}|$)`,
+        "i",
+      ),
+    );
+    const value = match ? match[1].trim() : "";
+    return value || "N/A";
+  }
+
+  /** Um item de afiliação, na ordem da wiki, sem markup. */
+  affiliationName(chunk) {
+    const link = chunk.match(/\[\[([^\[\]]+)\]\]/);
+    let name = link
+      ? link[1].includes("|")
+        ? link[1].split("|").pop()
+        : link[1].includes("#")
+          ? link[1].split("#").pop()
+          : link[1]
+      : this.cleanWikiText(chunk);
+    name = name.replace(/<[^>]+>/g, "").replace(/^\|+/, "").trim();
+    if (!name || /=/.test(name)) return "";
+    if (/^(expand|n\/a|unknown|none)$/i.test(name)) return "";
+    return name;
+  }
+
+  parseAffiliationList(str) {
+    if (!str || str === "N/A") return [];
+    const canon = str.split(/\{\{Expand/i)[0].split(/Show non-canon/i)[0];
+    const names = [];
+    const seen = new Set();
+    for (const line of canon.split(/\n|<br\s*\/?>/i)) {
+      let current = "";
+      let square = 0;
+      let curly = 0;
+      const chunks = [];
+      for (const ch of line) {
+        if (ch === "[") square++;
+        else if (ch === "]" && square) square--;
+        else if (ch === "{") curly++;
+        else if (ch === "}" && curly) curly--;
+        if (ch === "," && square === 0 && curly === 0) {
+          chunks.push(current);
+          current = "";
+          continue;
+        }
+        current += ch;
+      }
+      chunks.push(current);
+      for (const chunk of chunks) {
+        const name = this.affiliationName(chunk);
+        if (!name) continue;
+        const key = name.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        names.push(name);
+      }
+    }
+    return names;
+  }
+
   /** Páginas-índice da wiki, não personagens. */
   isSelectableCharacter(title) {
     return title !== "Characters" && title !== "Minor Characters";
   }
 
   extractAnimeField(wikitext) {
-    const match = wikitext.match(/\|Anime\s*=\s*([\s\S]*?)(?=\n\s*\||\}\})/i);
-    return match ? match[1].trim() : "";
+    const value = this.readTemplateField(wikitext, "Anime");
+    return value === "N/A" ? "" : value;
   }
 
   /** Estreia de verdade no anime. Só "mentioned" não conta como aparição. */
@@ -399,46 +481,10 @@ export class CharacterData {
       this.wikitextCache.set(name, wikitext);
     }
 
-    const getField = (f) => {
-      const r = new RegExp(
-        `\\|${f}\\s*=\\s*([\\s\\S]*?)(?=\\n\\s*\\||\\||\\}\\})`,
-        "i",
-      );
-      const m = wikitext.match(r);
-      return m ? m[1].trim() : "N/A";
-    };
+    const getField = (f) => this.readTemplateField(wikitext, f);
 
-    const processDeepAff = (str) => {
-      if (!str || str === "N/A") return [];
-      let canonText = str.split(/\{\{Expand/i)[0].split(/Show non-canon/i)[0];
-      let parts = new Set();
-      const linkRegex = /\[\[(.*?)\]\]/g;
-      let match;
-      while ((match = linkRegex.exec(canonText)) !== null) {
-        let inner = match[1];
-        let displayName = inner.includes("|")
-          ? inner.split("|").pop()
-          : inner.includes("#")
-            ? inner.split("#").pop()
-            : inner;
-        parts.add(displayName.trim());
-      }
-      const outside = canonText
-        .replace(/\[\[.*?\]\]/g, "")
-        .split(/[,\n]|<br\s*\/?>/);
-      outside.forEach((item) => {
-        let cleaned = item
-          .replace(/[{}[\]]/g, "")
-          .replace(/#/g, "")
-          .trim();
-        if (cleaned && cleaned.toLowerCase() !== "expand" && cleaned !== "")
-          parts.add(cleaned);
-      });
-      return Array.from(parts);
-    };
-
-    const currentAff = processDeepAff(getField("Affiliation"));
-    const prevAff = processDeepAff(getField("Previous Affiliation"));
+    const currentAff = this.parseAffiliationList(getField("Affiliation"));
+    const prevAff = this.parseAffiliationList(getField("Previous Affiliation"));
     const finalAff = currentAff.length > 0 ? currentAff : prevAff;
 
     // Limpa o status de referências da Wiki antes de traduzir
@@ -470,7 +516,7 @@ export class CharacterData {
       // 4. Afiliação já estava correta chamando o seu mapa
       Afiliation:
         finalAff.length > 0
-          ? finalAff.map((s) => this.translateAffiliation(s)).join("<br>")
+          ? finalAff.map((s) => this.translateAffiliation(s)).join(", ")
           : t("unknown"),
 
       AfiliationArray: finalAff.map((s) => s.toLowerCase()),

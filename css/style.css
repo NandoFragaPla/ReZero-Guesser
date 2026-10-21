@@ -377,6 +377,39 @@
     z-index: 1;
 }
 
+/* O palpite acompanha o texto. Afiliação e status longos não ficam cortados. */
+.square-answer-tile {
+    display: flex;
+    height: auto;
+    align-self: stretch;
+}
+
+.square-answer-tile::before {
+    content: none;
+    display: none;
+    padding-top: 0 !important;
+}
+
+.square-answer-tile .square-content {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    height: auto;
+    min-height: 88px;
+    flex: 1 1 auto;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.square-answer-tile .square-content img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 /* TESTING LIKE THE ANIMATION SHIT */
 .box-animation {
     transform-style: preserve-3d;
@@ -796,7 +829,7 @@
     .guessed-answers {
         width: 100%;
         overflow-x: auto;
-        overflow-y: hidden;
+        overflow-y: visible;
         -webkit-overflow-scrolling: touch;
         z-index: 1;
         padding-bottom: 8px;
