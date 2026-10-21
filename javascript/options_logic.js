@@ -40,8 +40,15 @@ window.onload = async () => {
     } catch (error) {
         console.error("Erro ao carregar dados da Wiki:", error);
         searchInp.placeholder = "Erro ao carregar. Tente atualizar.";
+    } finally {
+        hideLoader();
     }
 };
+
+function hideLoader() {
+    const loader = document.getElementById("loading-overlay");
+    if (loader) loader.style.display = "none";
+}
 
 //Essa função exibe o personagem de ontem
 function displayYesterdayCharacter(stats) {
@@ -84,7 +91,7 @@ function revealHint() {
 
     // Dica 2: Aparência (Liberada com 6 ou mais erros)
     if (count >= 6) {
-        let hair = (answer.HairColor && answer.HairColor !== "N/A") ? answer.HairColor : "N/A";
+        let hair = (answer.HairColor && answer.HairColor !== "N/A") ? answer.HairColor : "Desconhecido";
         hintParts.push(`<strong>Cabelo:</strong> ${hair}`);
     }
 

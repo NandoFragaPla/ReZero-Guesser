@@ -160,7 +160,8 @@
 .content {
     margin-top: 15px;
     padding-bottom: 20px;
-    width: 360px;
+    width: 100%;
+    max-width: 360px;
 }
 
 .content .search {
@@ -184,6 +185,7 @@
     max-width: 100%;
     width: 100%;
     padding: 0 15px 0 15px;
+    font-size: 16px;
 }
 
 .options {
@@ -442,6 +444,7 @@
     font-size: 1.5rem;
     color: var(--primary-color);
     font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
 .win-answer-text {
@@ -596,4 +599,134 @@
 .yesterday-content span {
     color: var(--primary-color);
     font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.loading-overlay img {
+    width: min(220px, 58vw);
+    height: auto;
+    animation: puck-bob 1.15s ease-in-out infinite;
+    filter: drop-shadow(0 14px 10px rgba(0, 0, 0, 0.45));
+}
+
+@keyframes puck-bob {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-22px);
+    }
+}
+
+@media (max-width: 1200px) {
+    html,
+    body {
+        overflow-x: hidden;
+    }
+
+    .custom-body {
+        background-attachment: scroll;
+    }
+
+    .header-container {
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .sub-container,
+    .game,
+    .answers,
+    .hint-section {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .game {
+        font-size: 1.25rem;
+    }
+
+    .fancy-background {
+        padding: 0.8rem 0.7rem;
+    }
+
+    .yesterday-row {
+        flex-wrap: wrap;
+        justify-content: center;
+        row-gap: 6px;
+        max-width: 100%;
+    }
+
+    .yesterday-content {
+        max-width: 100%;
+    }
+
+    .guessed-answers {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        z-index: 1;
+        padding-bottom: 8px;
+    }
+
+    .guessed-answers-header,
+    .guessed-answers-container,
+    .user-answer,
+    .square-container {
+        width: max-content;
+        min-width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+
+    .square,
+    .square-answer-tile {
+        flex: 0 0 84px;
+        width: 84px;
+        min-width: 84px;
+        max-width: 84px;
+        margin: 3px;
+    }
+
+    .square-answer-tile {
+        min-height: 84px;
+    }
+
+    .square-content {
+        font-size: 0.72rem;
+        padding: 3px;
+    }
+
+    .char-name-overlay {
+        font-size: 0.62rem;
+    }
+
+    .win-background {
+        padding: 1.4rem 1rem;
+    }
+
+    .win-answer {
+        flex-direction: column;
+        row-gap: 0.6rem;
+    }
+
+    .countdown li span,
+    .countdown .separator {
+        font-size: 2.2rem;
+    }
+
+    .hint-text {
+        text-align: left;
+    }
 }

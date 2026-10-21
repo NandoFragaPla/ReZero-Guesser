@@ -130,6 +130,102 @@ export class CharacterData {
     return val.toString();
   }
 
+  translateHint(raw, kind) {
+    if (!raw || raw === "N/A") return "N/A";
+    const cleaned = raw.replace(/<ref[\s\S]*?<\/ref>/gi, "").replace(/[\[\]]/g, "");
+    const parts = cleaned
+      .split(/<br\s*\/?>/i)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) =>
+        kind === "hair" ? this.translateHairColor(part) : this.translateDebut(part),
+      );
+    return parts.length > 0 ? parts.join("<br>") : "N/A";
+  }
+
+  translateDebut(str) {
+    let text = str
+      .replace(/Re:\s*Zero\s+Light Novel\s+Volume\s+(\d+)/gi, "Volume $1")
+      .replace(/Re:\s*Zero\s+Ex\s+Light Novel\s+Volume\s+(\d+)/gi, "Ex, volume $1")
+      .replace(/Re:\s*Zero\s+Tanpenshuu\s+Volume\s+(\d+)/gi, "Tanpenshuu, volume $1")
+      .replace(/Re:\s*Zero\s+Prequel\s*:/gi, "Prequela de Re:Zero:")
+      .replace(/\bArc\s+(\d+)/gi, "Arco $1")
+      .replace(/\bPage\s+(\d+)/gi, "Página $1")
+      .replace(/\bEpisode\s+(\d+)/gi, "Episódio $1")
+      .replace(/\bside story\b/gi, "história paralela");
+    return this.translateHintNotes(text);
+  }
+
+  translateHairColor(str) {
+    const colors = [
+      ["transparent golden blonde", "loiro dourado transparente"],
+      ["blackish brown", "castanho-escuro"],
+      ["chestnut brown", "castanho"],
+      ["charred brown", "castanho queimado"],
+      ["cream blonde", "loiro creme"],
+      ["purplish black", "preto arroxeado"],
+      ["flaming red", "vermelho vivo"],
+      ["dark green", "verde-escuro"],
+      ["dark brown", "castanho-escuro"],
+      ["dark blue", "azul-escuro"],
+      ["light purple", "roxo-claro"],
+      ["indigo blue", "azul-índigo"],
+      ["ashen grey", "cinza-claro"],
+      ["ashen gray", "cinza-claro"],
+      ["sky blue", "azul-celeste"],
+      ["pale gold", "dourado-claro"],
+      ["pale red", "vermelho-claro"],
+      ["platinum", "platinado"],
+      ["silver", "prateado"],
+      ["blonde", "loiro"],
+      ["brown", "castanho"],
+      ["black", "preto"],
+      ["white", "branco"],
+      ["orange", "laranja"],
+      ["purple", "roxo"],
+      ["indigo", "índigo"],
+      ["auburn", "ruivo"],
+      ["green", "verde"],
+      ["grey", "cinza"],
+      ["gray", "cinza"],
+      ["gold", "dourado"],
+      ["pink", "rosa"],
+      ["blue", "azul"],
+      ["red", "vermelho"],
+    ];
+    let text = str;
+    if (/unknown/i.test(text)) return "Desconhecido";
+    for (const [en, pt] of colors) {
+      text = text.replace(new RegExp(`\\b${en}\\b`, "gi"), pt);
+    }
+    text = this.translateHintNotes(text);
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  translateHintNotes(str) {
+    const notes = [
+      ["most commonly seen", "aparência mais comum"],
+      ["side story", "história paralela"],
+      ["light novel", "light novel"],
+      ["silhouette", "silhueta"],
+      ["flashback", "retrospectiva"],
+      ["mentioned", "mencionado"],
+      ["appearance", "aparição"],
+      ["variable", "variável"],
+      ["current", "atual"],
+      ["actual", "aparição"],
+      ["cameo", "participação"],
+      ["past", "passado"],
+    ];
+    let text = str
+      .replace(/\(anime\)/gi, "(no anime)")
+      .replace(/\(light novel\)/gi, "(na light novel)");
+    for (const [en, pt] of notes) {
+      text = text.replace(new RegExp(`\\b${en}\\b`, "gi"), pt);
+    }
+    return text;
+  }
+
   translate(val, type = "default", charName = "") {
     if (
       type === "magic" &&
@@ -190,9 +286,15 @@ export class CharacterData {
         );
       cmcontinue = data.continue ? data.continue.cmcontinue : null;
     } while (cmcontinue);
+    allTitles = allTitles.filter((title) => this.isSelectableCharacter(title));
     await this.fetchImages(allTitles);
     this.cachedList = allTitles;
     return allTitles;
+  }
+
+  /** Páginas-índice da wiki, não personagens. */
+  isSelectableCharacter(title) {
+    return title !== "Characters" && title !== "Minor Characters";
   }
 
   async fetchImages(titles) {
@@ -299,9 +401,9 @@ export class CharacterData {
       Protection: getField("Divine Protection").length > 5 ? "Sim" : "Não",
       Authority: getField("Authority").length > 5 ? "Sim" : "Não",
       Image: this.imageMap[name],
-      DebutLN: getField("Light Novel").replace(/[\[\]]/g, ""),
-      DebutAnime: getField("Anime").replace(/[\[\]]/g, ""),
-      HairColor: getField("Hair Color").replace(/[\[\]]/g, ""),
+      DebutLN: this.translateHint(getField("Light Novel"), "debut"),
+      DebutAnime: this.translateHint(getField("Anime"), "debut"),
+      HairColor: this.translateHint(getField("Hair Color"), "hair"),
     };
   }
 

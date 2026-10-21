@@ -113,7 +113,7 @@ export const affiliationsMap = {
     "Vollachia Empire": 'Império Vollachia',
     "Vollachia Shinobi Village": 'Aldeia Shinobi Vollachia',
     "White Dragon's Scales": 'Escamas do Dragão Branco',
-    "Witch Cult": 'Culto das Bruxas',
+    "Witch Cult": 'Culto da Bruxa',
     "Witches Of Sin": 'Bruxas do Pecado',
     "Witchwitches Of Sin": 'Bruxas do Pecado',
     "Wolf Person Village": 'Aldeia dos Homens-Lobo',
