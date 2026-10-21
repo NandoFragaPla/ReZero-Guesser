@@ -1,5 +1,6 @@
 import { affiliationsMap } from "./character_afiliation_data.js";
 import { gendersMap } from "./character_gender_data.js";
+import { getLang, t } from "./i18n.js";
 import { racesMap } from "./character_race_data.js";
 import { statusMap } from "./character_status_data.js";
 
@@ -10,6 +11,8 @@ export class CharacterData {
     this.cachedList = [];
     this.cachedShuffled = [];
     this.cachedShuffleKey = "";
+    this.wikitextCache = new Map();
+    this.statsCache = new Map();
   }
 
   hashString(str) {
@@ -71,22 +74,26 @@ export class CharacterData {
   // Busca a tradução no seu mapa. Se não existir, retorna o nome original formatado.
   translateAffiliation(name) {
     const formattedName = this.formatTitleCase(name);
+    if (getLang() === "en") return formattedName;
     return affiliationsMap[formattedName] || formattedName;
   }
 
   translateRace(name) {
     const formattedName = this.formatTitleCase(name.trim());
+    if (getLang() === "en") return formattedName;
     return racesMap[formattedName] || formattedName;
   }
 
   translateGender(name) {
     const formattedName = this.formatTitleCase(name.trim());
+    if (getLang() === "en") return formattedName;
     return gendersMap[formattedName] || formattedName;
   }
 
   translateStatus(name) {
-    if (!name) return "Desconhecido";
+    if (!name) return t("unknown");
     const clean = name.trim().replace(/<ref.*?>.*?<\/ref>/g, "");
+    if (getLang() === "en") return clean;
     // Busca exata
     if (statusMap[clean]) return statusMap[clean];
     // Busca case-insensitive e ignora espaços extras
@@ -100,7 +107,7 @@ export class CharacterData {
 
   /** Extrai a maior idade e mantém o "+" */
   extractAge(str, charName) {
-    if (charName.includes("Roswaal K.")) return "Desconhecida";
+    if (charName.includes("Roswaal K.")) return t("unknown");
     if (!str || str === "N/A" || str.toLowerCase().includes("unknown"))
       return "0";
 
@@ -144,15 +151,16 @@ export class CharacterData {
   }
 
   translateDebut(str) {
+    const english = getLang() === "en";
     let text = str
       .replace(/Re:\s*Zero\s+Light Novel\s+Volume\s+(\d+)/gi, "Volume $1")
       .replace(/Re:\s*Zero\s+Ex\s+Light Novel\s+Volume\s+(\d+)/gi, "Ex, volume $1")
       .replace(/Re:\s*Zero\s+Tanpenshuu\s+Volume\s+(\d+)/gi, "Tanpenshuu, volume $1")
-      .replace(/Re:\s*Zero\s+Prequel\s*:/gi, "Prequela de Re:Zero:")
-      .replace(/\bArc\s+(\d+)/gi, "Arco $1")
-      .replace(/\bPage\s+(\d+)/gi, "Página $1")
-      .replace(/\bEpisode\s+(\d+)/gi, "Episódio $1")
-      .replace(/\bside story\b/gi, "história paralela");
+      .replace(/Re:\s*Zero\s+Prequel\s*:/gi, english ? "Re:Zero prequel:" : "Prequela de Re:Zero:")
+      .replace(/\bArc\s+(\d+)/gi, english ? "Arc $1" : "Arco $1")
+      .replace(/\bPage\s+(\d+)/gi, english ? "Page $1" : "Página $1")
+      .replace(/\bEpisode\s+(\d+)/gi, english ? "Episode $1" : "Episódio $1")
+      .replace(/\bside story\b/gi, english ? "side story" : "história paralela");
     return this.translateHintNotes(text);
   }
 
@@ -194,7 +202,11 @@ export class CharacterData {
       ["red", "vermelho"],
     ];
     let text = str;
-    if (/unknown/i.test(text)) return "Desconhecido";
+    if (/unknown/i.test(text)) return t("unknown");
+    if (getLang() === "en") {
+      text = this.translateHintNotes(text);
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
     for (const [en, pt] of colors) {
       text = text.replace(new RegExp(`\\b${en}\\b`, "gi"), pt);
     }
@@ -203,6 +215,7 @@ export class CharacterData {
   }
 
   translateHintNotes(str) {
+    if (getLang() === "en") return str;
     const notes = [
       ["most commonly seen", "aparência mais comum"],
       ["side story", "história paralela"],
@@ -231,7 +244,7 @@ export class CharacterData {
       type === "magic" &&
       (charName.includes("Julius") || charName.includes("Arakiya"))
     ) {
-      return "Todos os elementos (via espíritos)";
+      return t("allMagic");
     }
 
     if (
@@ -241,7 +254,7 @@ export class CharacterData {
       val.toLowerCase().includes("unknown") ||
       val.toLowerCase() === "none"
     ) {
-      return type === "binary" ? "Não" : "Desconhecido";
+      return type === "binary" ? t("no") : t("unknown");
     }
 
     if (type === "magic") {
@@ -253,13 +266,16 @@ export class CharacterData {
         { en: "Yin Magic", pt: "Yin" },
         { en: "Yang Magic", pt: "Yang" },
       ];
+      const english = getLang() === "en";
       let found = allowedMagics
         .filter((m) => val.toLowerCase().includes(m.en.toLowerCase()))
-        .map((m) => m.pt);
-      return found.length > 0 ? found.join(", ") : "Desconhecido";
+        .map((m) => (english ? m.en.replace(" Magic", "") : m.pt));
+      return found.length > 0 ? found.join(", ") : t("unknown");
     }
 
-    const t = {
+    if (getLang() === "en") return val;
+
+    const words = {
       Male: "Masculino",
       Female: "Feminino",
       Human: "Humano",
@@ -268,7 +284,7 @@ export class CharacterData {
     };
     return val
       .split(",")
-      .map((item) => t[item.trim()] || item.trim())
+      .map((item) => words[item.trim()] || item.trim())
       .join(", ");
   }
 
@@ -315,12 +331,19 @@ export class CharacterData {
   }
 
   async loadCharacterStats(name) {
-    const res = await fetch(
-      `${this.wikiApi}?action=parse&page=${encodeURIComponent(name)}&prop=wikitext&format=json&origin=*`,
-    );
-    const data = await res.json();
-    if (!data.parse) return null;
-    const wikitext = data.parse.wikitext["*"];
+    const cacheKey = `${getLang()}:${name}`;
+    if (this.statsCache.has(cacheKey)) return this.statsCache.get(cacheKey);
+
+    let wikitext = this.wikitextCache.get(name);
+    if (!wikitext) {
+      const res = await fetch(
+        `${this.wikiApi}?action=parse&page=${encodeURIComponent(name)}&prop=wikitext&format=json&origin=*`,
+      );
+      const data = await res.json();
+      if (!data.parse) return null;
+      wikitext = data.parse.wikitext["*"];
+      this.wikitextCache.set(name, wikitext);
+    }
 
     const getField = (f) => {
       const r = new RegExp(
@@ -369,7 +392,7 @@ export class CharacterData {
       .replace(/<ref.*?>.*?<\/ref>/g, "")
       .trim();
 
-    return {
+    const stats = {
       Character: name,
       // 1. Usa o novo dicionário de Gênero
       Gender: this.translateGender(getField("Gender")),
@@ -381,7 +404,7 @@ export class CharacterData {
               .split(",")
               .map((r) => this.translateRace(r))
               .join(", ")
-          : "Desconhecido",
+          : t("unknown"),
 
       Height: this.extractHeight(getField("Height")),
 
@@ -394,17 +417,19 @@ export class CharacterData {
       Afiliation:
         finalAff.length > 0
           ? finalAff.map((s) => this.translateAffiliation(s)).join("<br>")
-          : "Desconhecido",
+          : t("unknown"),
 
       AfiliationArray: finalAff.map((s) => s.toLowerCase()),
       Elemental: this.translate(getField("Magic"), "magic", name),
-      Protection: getField("Divine Protection").length > 5 ? "Sim" : "Não",
-      Authority: getField("Authority").length > 5 ? "Sim" : "Não",
+      Protection: getField("Divine Protection").length > 5 ? t("yes") : t("no"),
+      Authority: getField("Authority").length > 5 ? t("yes") : t("no"),
       Image: this.imageMap[name],
       DebutLN: this.translateHint(getField("Light Novel"), "debut"),
       DebutAnime: this.translateHint(getField("Anime"), "debut"),
       HairColor: this.translateHint(getField("Hair Color"), "hair"),
     };
+    this.statsCache.set(cacheKey, stats);
+    return stats;
   }
 
   async characterGuess(ansName, gName) {
