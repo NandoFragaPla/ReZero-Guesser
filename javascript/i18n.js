@@ -33,6 +33,8 @@ const messages = {
     hintGear: "Equipamento",
     hintExtra: "Extra",
     allMagic: "Todos os elementos (via espíritos)",
+    animeMode: "Anime Only Mode",
+    completeMode: "Complete Mode",
   },
   en: {
     guessTitle: "Guess today's Re:Zero character!",
@@ -66,8 +68,34 @@ const messages = {
     hintGear: "Equipment",
     hintExtra: "Extra",
     allMagic: "All elements (via spirits)",
+    animeMode: "Anime Only Mode",
+    completeMode: "Complete Mode",
   },
 };
+
+const MODE_KEY = "rezero-mode";
+let mode = "complete";
+
+try {
+  const savedMode = localStorage.getItem(MODE_KEY);
+  if (savedMode === "anime" || savedMode === "complete") mode = savedMode;
+} catch {
+  mode = "complete";
+}
+
+export function getMode() {
+  return mode;
+}
+
+export function setMode(next) {
+  mode = next === "anime" ? "anime" : "complete";
+  try {
+    localStorage.setItem(MODE_KEY, mode);
+  } catch {
+    /* ignora navegadores sem storage */
+  }
+  return mode;
+}
 
 let lang = "pt";
 

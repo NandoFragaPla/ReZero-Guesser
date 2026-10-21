@@ -1,6 +1,6 @@
 // Adicione esta linha no TOPO do options_logic.js
 import { CharacterData } from "./character_data.js";
-import { format, getLang, setLang, t } from "./i18n.js";
+import { format, getLang, getMode, setLang, setMode, t } from "./i18n.js";
 
 const guessbox = document.querySelector(".guessbox"), options = guessbox.querySelector(".options"), searchInp = guessbox.querySelector("input");
 const btnHint = document.getElementById("btn-hint"), hintDisplay = document.getElementById("hint-display");
@@ -18,7 +18,7 @@ window.onload = async () => {
         
         // Carrega a lista principal
         await CD.loadCharacters();
-        characters = CD.cachedList;
+        characters = await CD.getPlayableCharacters();
 
         // Atualiza o contador na tela usando a lista que já baixamos
         if (charCountDiv) {
@@ -229,15 +229,60 @@ function triggerWin(stats) {
 }
 
 //Mostra a quantidade de personagens carregados da wiki na tela, quando a lista de personagens carregar
-async function updateCharacterCount() {
-    const CDtemp = new CharacterData();
-    await CDtemp.loadCharacters();
-    const count = CDtemp.cachedList.length;
-    if (charCountDiv) {
-        charCountDiv.innerText = format("count", { n: count });
+function showLoader() {
+    const loader = document.getElementById("loading-overlay");
+    if (loader) loader.style.display = "flex";
+}
+
+function resetRound() {
+    alreadyChosen = [];
+    popupMode = null;
+    const box = document.querySelector(".user-answer");
+    if (box) box.innerHTML = "";
+    if (hintDisplay) {
+        hintDisplay.style.display = "none";
+        hintDisplay.innerHTML = "";
+    }
+    if (btnHint) btnHint.style.display = "none";
+    const guess = document.querySelector(".guessbox");
+    if (guess) guess.style.display = "";
+    const popup = document.getElementById("win-popup");
+    if (popup) popup.style.display = "none";
+    searchInp.value = "";
+    options.style.display = "none";
+}
+
+async function changeMode(next) {
+    if (!CD || next === getMode()) return;
+    setMode(next);
+    applyI18n();
+    showLoader();
+    uiPhase = "loading";
+    searchInp.disabled = true;
+    searchInp.placeholder = t("loading");
+    try {
+        resetRound();
+        characters = await CD.getPlayableCharacters();
+        if (charCountDiv) charCountDiv.innerText = format("count", { n: characters.length });
+        answer = await CD.loadCharacterStats(await CD.getDailyCharacter());
+        const yesterdayStats = await CD.loadCharacterStats(await CD.getYesterdayCharacter());
+        displayYesterdayCharacter(yesterdayStats);
+        populateFullList();
+        uiPhase = "ready";
+        searchInp.placeholder = t("typeName");
+        searchInp.disabled = false;
+    } catch (error) {
+        console.error("Erro ao trocar o modo:", error);
+        uiPhase = "error";
+        searchInp.placeholder = t("loadError");
+    } finally {
+        hideLoader();
     }
 }
-updateCharacterCount();
+
+document.querySelectorAll(".mode-btn").forEach((btn) => {
+    btn.onclick = () => changeMode(btn.dataset.mode);
+});
 
 function applyTries(count) {
     const line = document.querySelector(".nb-trys");
@@ -266,6 +311,11 @@ function applyI18n() {
         const active = btn.dataset.lang === getLang();
         btn.classList.toggle("active", active);
         btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    document.querySelectorAll(".mode-btn").forEach((btn) => {
+        const active = btn.dataset.mode === getMode();
+        btn.classList.toggle("active", active);
+        btn.setAttribute("aria-selected", active ? "true" : "false");
     });
 }
 

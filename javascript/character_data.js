@@ -1,6 +1,6 @@
 import { affiliationsMap } from "./character_afiliation_data.js";
 import { gendersMap } from "./character_gender_data.js";
-import { getLang, t } from "./i18n.js";
+import { getLang, getMode, t } from "./i18n.js";
 import { racesMap } from "./character_race_data.js";
 import { statusMap } from "./character_status_data.js";
 
@@ -13,6 +13,7 @@ export class CharacterData {
     this.cachedShuffleKey = "";
     this.wikitextCache = new Map();
     this.statsCache = new Map();
+    this.animeSet = null;
   }
 
   hashString(str) {
@@ -313,6 +314,59 @@ export class CharacterData {
     return title !== "Characters" && title !== "Minor Characters";
   }
 
+  extractAnimeField(wikitext) {
+    const match = wikitext.match(/\|Anime\s*=\s*([\s\S]*?)(?=\n\s*\||\}\})/i);
+    return match ? match[1].trim() : "";
+  }
+
+  /** Estreia de verdade no anime. Só "mentioned" não conta como aparição. */
+  appearedInAnime(raw) {
+    if (!raw) return false;
+    const clean = raw
+      .replace(/<ref[\s\S]*?<\/ref>/gi, "")
+      .replace(/\{\{[\s\S]*?\}\}/g, "")
+      .replace(/\[\[(?:[^|\]]*\|)?([^\]]+)\]\]/g, "$1")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .trim();
+    if (!clean || /^(n\/a|unknown|none|-+)$/i.test(clean)) return false;
+    const parts = clean
+      .split("\n")
+      .map((part) => part.trim())
+      .filter((part) => /episode/i.test(part));
+    return parts.some((part) => !/\(mentioned\)/i.test(part));
+  }
+
+  async loadAnimeNames() {
+    if (this.animeSet) return this.animeSet;
+    const all = await this.loadCharacters();
+    const names = new Set();
+    for (let i = 0; i < all.length; i += 25) {
+      const chunk = all.slice(i, i + 25);
+      const res = await fetch(
+        `${this.wikiApi}?action=query&prop=revisions&rvprop=content&rvslots=main&titles=${encodeURIComponent(chunk.join("|"))}&format=json&origin=*`,
+      );
+      const data = await res.json();
+      const pages = data.query?.pages || {};
+      for (const id in pages) {
+        const page = pages[id];
+        const text = page.revisions?.[0]?.slots?.main?.["*"] || "";
+        if (text) this.wikitextCache.set(page.title, text);
+        if (page.title && this.appearedInAnime(this.extractAnimeField(text))) {
+          names.add(page.title);
+        }
+      }
+    }
+    this.animeSet = names;
+    return names;
+  }
+
+  async getPlayableCharacters() {
+    const all = await this.loadCharacters();
+    if (getMode() !== "anime") return all;
+    const anime = await this.loadAnimeNames();
+    return all.filter((name) => anime.has(name));
+  }
+
   async fetchImages(titles) {
     for (let i = 0; i < titles.length; i += 50) {
       const chunk = titles.slice(i, i + 50).join("|");
@@ -528,7 +582,7 @@ export class CharacterData {
   }
 
   async getCharacterForDay(offset = 0, now = new Date()) {
-    const list = await this.loadCharacters();
+    const list = await this.getPlayableCharacters();
     const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
     return this.pickCharacter(list, date);
   }
