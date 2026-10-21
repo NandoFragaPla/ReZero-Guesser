@@ -273,7 +273,6 @@
     word-break: break-word;    /* Força a quebra (essencial para nomes compostos) */
     line-height: 1.1;         /* Diminui o espaço entre linhas para caber mais texto */
     font-size: 0.9rem;       /* Reduz levemente a fonte apenas para os dados */
-    hyphens: auto;            /* Adiciona hífens se o navegador suportar */
 }
 
 .square::before {

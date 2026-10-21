@@ -8,6 +8,55 @@ export class CharacterData {
     this.wikiApi = "https://rezero.fandom.com/api.php";
     this.imageMap = {};
     this.cachedList = [];
+    this.cachedShuffled = [];
+    this.cachedShuffleKey = "";
+  }
+
+  hashString(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+  }
+
+  gcd(a, b) {
+    let x = Math.abs(a);
+    let y = Math.abs(b);
+    while (y) {
+      const t = y;
+      y = x % y;
+      x = t;
+    }
+    return x;
+  }
+
+  mod(n, m) {
+    if (m <= 0) return 0;
+    return ((n % m) + m) % m;
+  }
+
+  /** Índice do dia no calendário local, estável mesmo com horário de verão. */
+  calendarDayIndex(date = new Date()) {
+    const day = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const start = new Date(2020, 0, 1);
+    return Math.round((day.getTime() - start.getTime()) / 86400000);
+  }
+
+  /**
+   * Passo coprimo com o tamanho da lista. Dias seguidos não caem em vizinhos
+   * e a rotação só repete um personagem depois de percorrer a lista inteira.
+   */
+  dailyStep(length) {
+    if (length <= 2) return 1;
+    const origin = this.hashString("rezero-guesser-step-v3") % (length - 1);
+    for (let k = 0; k < length - 1; k++) {
+      const step = ((origin + k) % (length - 1)) + 1;
+      if (step === 1 || step === length - 1) continue;
+      if (this.gcd(step, length) === 1) return step;
+    }
+    return 1;
   }
 
   // Formata string para Title Case (Ex: "WITNESS" -> "Witness")
@@ -313,15 +362,55 @@ export class CharacterData {
     return res;
   }
 
-  async getDailyCharacter() {
+  /** Fisher-Yates com semente fixa: a mesma lista produz a mesma ordem para todos. */
+  getShuffledList(list) {
+    const normalized = list.slice().sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    const key = `${normalized.length}:${this.hashString(normalized.join("\u0000"))}`;
+    if (key === this.cachedShuffleKey && this.cachedShuffled.length > 0) {
+      return this.cachedShuffled;
+    }
+    const arr = normalized.slice();
+    let s = (0x9e3779b9 ^ this.hashString("rezero-guesser-shuffle-v3")) | 0;
+    const next = () => {
+      s = (s + 0x6d2b79f5) | 0;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(next() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    this.cachedShuffleKey = key;
+    this.cachedShuffled = arr;
+    return arr;
+  }
+
+  /**
+   * Personagem do dia. Todos recebem o mesmo nome na mesma data, mas dias
+   * consecutivos não seguem a ordem da wiki nem a ordem embaralhada.
+   */
+  pickCharacter(list, date = new Date()) {
+    if (!list || list.length === 0) return null;
+    const shuffled = this.getShuffledList(list);
+    const length = shuffled.length;
+    const step = this.dailyStep(length);
+    const start = this.hashString("rezero-guesser-start-v3") % length;
+    const index = this.mod(start + this.calendarDayIndex(date) * step, length);
+    return shuffled[index];
+  }
+
+  async getCharacterForDay(offset = 0, now = new Date()) {
     const list = await this.loadCharacters();
-    const seed = Math.floor(new Date().setHours(0, 0, 0, 0) / 86400000);
-    return list[seed % list.length];
+    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
+    return this.pickCharacter(list, date);
+  }
+
+  async getDailyCharacter() {
+    return this.getCharacterForDay(0);
   }
 
   async getYesterdayCharacter() {
-    const list = await this.loadCharacters();
-    const seed = Math.floor(new Date().setHours(0, 0, 0, 0) / 86400000) - 1;
-    return list[seed % list.length];
+    return this.getCharacterForDay(-1);
   }
 }

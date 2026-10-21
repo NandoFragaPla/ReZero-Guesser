@@ -47,6 +47,6 @@ export const racesMap = {
     "Tanuki Human": "Homem-Tanuki",
     "Weaponkin": "Weaponkin",
     "Werewolf/wolf Human And Human Hybrid": "Lobisomem (Híbrido de Homem-Lobo e Humano)",
-    "Witchbeast": "Maju (Besta da Bruxa)",
+    "Witchbeast": "Majuu (Besta da Bruxa)",
     "Wolf Human": "Homem-Lobo"
 };

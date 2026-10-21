@@ -1,7 +1,7 @@
 export const affiliationsMap = {
     "(finger)": 'Dedos',
     "Anastasia Camp": 'Acampamento Anastasia',
-    "Arlam Village":'Aldeia Arlam',
+    "Arlam Village":'Vila de Arlam',
     "Balleroy Temeglyph": 'Balleroy Temeglyph',
     "Banan": 'Banan',
     "Black Silver Coin": 'Moeda Prata Negra',
@@ -63,7 +63,7 @@ export const affiliationsMap = {
     "Imperial Army": 'Exército Imperial',
     "Imperial Armynine Divine Generals": 'Nove Generais Divinos do Exército Imperial',
     "Imperial Selection Ceremony": 'Cerimônia de Seleção Imperial',
-    "Irlam Village": 'Aldeia Irlam',
+    "Irlam Village": 'Vila de Irlam',
     "Iron Fang": 'Presas de Ferro',
     "Ivada":'Ivada',
     "Japan": 'Japão',
