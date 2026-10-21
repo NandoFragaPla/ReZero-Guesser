@@ -194,8 +194,7 @@ function renderGuessResult(res, stats) {
     data.forEach((item, i) => {
         const square = document.createElement('div');
         const arrowClass = (item.arrow && item.arrow !== 'correct') ? `square-${item.arrow}` : '';
-        let statusClass = item.status || 'none';
-        if (item.type === 'img' && statusClass === 'incorrect') statusClass = 'none';
+        const statusClass = item.status || 'none';
         square.className = `square square-answer-tile box-animation active guess-${statusClass} ${arrowClass}`;
         const isUnknown = (item.val === "0" || item.val === "0cm" || item.val === "Desconhecido");
         const content = isUnknown ? "Desconhecido" : item.val;
